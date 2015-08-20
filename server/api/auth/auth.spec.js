@@ -8,8 +8,9 @@ var agent = request.agent(app);
 
 describe('Auth API', function() {
   var user = {
-    username: 'a',
-    auth: {
+    local: {
+      username: 'a',
+      role: 'user',
       hashedPassword: '$2a$08$7uGRhAW9gbbSCRLb4u/Sou07Zj0PMHwJKNg3NVgRYJVeo/8HE2J8m'
       // password: 'test'
     }
@@ -34,29 +35,41 @@ describe('Auth API', function() {
   it("Can't log in with wrong username", function(done) {
     agent
       .post('/login')
-      .send({ username: 'b', password: 'test' })
+      .send({
+        username: 'b',
+        password: 'test'
+      })
       .expect(401, done)
     ;
   });
   it("Can't log in with wrong password", function(done) {
     agent
       .post('/login')
-      .send({ username: 'a', password: 'wrong' })
+      .send({
+        username: 'a',
+        password: 'wrong'
+      })
       .expect(401, done)
     ;
   });
   it('Can log in with valid credentials', function(done) {
     agent
       .post('/login')
-      .send({ username: 'a', password: 'test' })
+      .send({
+        username: 'a',
+        password: 'test'
+      })
       .expect(200)
       .end(function(err, res) {
         if (err) {
           return done(err);
         }
         var result = JSON.parse(res.text);
-        assert.equal(result.username, user.username);
-        assert(!result.auth);
+        assert(result._id);
+        assert(result.local);
+        assert.equal(result.local.username, user.local.username);
+        assert.equal(result.local.role, user.local.role);
+        assert(!result.local.hashedPassword);
         return done();
       })
     ;
@@ -70,8 +83,11 @@ describe('Auth API', function() {
           return done(err);
         }
         var result = JSON.parse(res.text);
-        assert.equal(result.username, user.username);
-        assert(!result.auth);
+        assert(result._id);
+        assert(result.local);
+        assert.equal(result.local.username, user.local.username);
+        assert.equal(result.local.role, user.local.role);
+        assert(!result.local.hashedPassword);
         return done();
       })
     ;

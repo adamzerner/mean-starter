@@ -34,26 +34,26 @@ router.get('/:id', function(req, res) {
 });
 
 router.post('/', function(req, res) {
+  if (req.body.local.role) {
+    return res.status(403).send("Can't manually set the role of a user.");
+  }
+
   // set admin: going with this approach for the time being. makes it easier to test.
-  if (req.body.username === 'admin') {
-    req.body.role = 'admin';
+  if (req.body.local.username === 'admin') {
+    req.body.local.role = 'admin';
   }
   else {
-    req.body.role = 'user';
+    req.body.local.role = 'user';
   }
 
   // hash password
-  if (req.body.password) {
-    req.body.auth = {};
-    req.body.auth.hashedPassword = bcrypt.hashSync(req.body.password, 8);
+  if (req.body.local.password) {
+    req.body.local.hashedPassword = bcrypt.hashSync(req.body.local.password, 8);
+    delete req.body.local.password;
   }
   else {
     return res.status(400).send('A password is required.');
   }
-
-  // set isAuthenticatedWith
-  req.body.isAuthenticatedWith = {};
-  req.body.isAuthenticatedWith.local = true;
 
   User
     .create(req.body)
@@ -63,30 +63,43 @@ router.post('/', function(req, res) {
           return res.status(500).send('Problem logging in after signup.');
         }
         var userCopy = JSON.parse(JSON.stringify(user));
-        delete userCopy.auth;
+        delete userCopy.local.hashedPassword;
         return res.status(201).json(userCopy);
       });
     })
     .then(null, function(err) {
-      var usernameError = !!(err && err.errors && err.errors.username);
-      var usernameNotUnique = ~err.errors.username.message.indexOf('unique');
-      var usernameNotPresent = ~err.errors.username.message.indexOf('required');
+      var usernameNotPresent, usernameNotUnique;
+      var usernameError = !!(err && err.errors && err.errors['local.username']);
+      if (usernameError) {
+        usernameNotPresent = err.errors['local.username'].message === 'Local auth requires a username.';
+        usernameNotUnique = err.errors['local.username'].message === 'Username must be unique.';
+      }
       if (usernameError && usernameNotUnique) {
         return res.status(409).send('Username already exists.');
       }
-      else if (usernameError && usernameNotPresent) {
+      if (usernameError && usernameNotPresent) {
         return res.status(400).send('A username is required.');
       }
-      else {
-        return res.status(500).send(err);
-      }
+      return res.status(500).send(err);
     });
 });
 
 router.put('/:id', Auth.isAuthorized, function(req, res) {
-  if (req.body.password) {
-    req.body.auth = {};
-    req.body.auth.hashedPassword = bcrypt.hashSync(req.body.password, 8);
+  if (req.body.local.role) {
+    return res.status(403).send("Can't manually set the role of a user.");
+  }
+
+  // set admin: going with this approach for the time being. makes it easier to test.
+  if (req.body.local.username === 'admin') {
+    req.body.local.role = 'admin';
+  }
+  else {
+    req.body.local.role = 'user';
+  }
+
+  if (req.body.local.password) {
+    req.body.local.hashedPassword = bcrypt.hashSync(req.body.local.password, 8);
+    delete req.body.local.password;
   }
 
   User

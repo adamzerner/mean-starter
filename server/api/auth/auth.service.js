@@ -7,7 +7,7 @@ function hasRole (roles) {
     }
 
     return function (req, res, next) {
-      if (!req.user || roles.indexOf(req.user.role) === -1) {
+      if (!req.user || !req.user.local || roles.indexOf(req.user.local.role) === -1) {
         return res.status(401).send('Unauthorized');
       }
       next();
@@ -15,9 +15,9 @@ function hasRole (roles) {
 }
 
 function isAuthorized(req, res, next) {
-  var isAuthorized = req.user &&
+  var isAuthorized = req.user && req.user.local &&
     (
-      req.user.role === 'admin' ||
+      req.user.local.role === 'admin' ||
       req.params.id === req.user._id.toString()
     )
   ;

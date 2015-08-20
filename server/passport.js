@@ -24,19 +24,21 @@ module.exports = function(passport) {
   // LOCAL
   passport.use(new LocalStrategy(function(username, password, done) {
     User
-      .findOne({ username: username })
-      .select('username auth.hashedPassword')
+      .findOne({ 'local.username': username })
+      .select('local')
       .exec()
       .then(function(user) {
         if (!user) {
           return done(null, false);
         }
-        var validPassword = bcrypt.compareSync(password, user.auth.hashedPassword);
+        var validPassword = bcrypt.compareSync(password, user.local.hashedPassword);
         if (!validPassword) {
           return done(null, false);
         }
         else {
-          return done(null, user);
+          var userCopy = JSON.parse(JSON.stringify(user));
+          delete userCopy.local.hashedPassword;
+          return done(null, userCopy); // set req.user
         }
       })
       .then(null, function(err) {
@@ -53,7 +55,7 @@ module.exports = function(passport) {
   }, function(token, refreshToken, profile, done) {
     // asynchronous
     process.nextTick(function() {
-      User.findOne({ 'auth.facebookToken': token }, function(err, user) {
+      User.findOne({ 'facebook.token': token }, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -62,15 +64,14 @@ module.exports = function(passport) {
         }
         else {
           var newUser = new User();
-          newUser.username = Math.random().toString(); // TODO make username and role required only when using the local strategy
-          newUser.isAuthenticatedWith = {};
-          newUser.isAuthenticatedWith.facebook = true;
-          newUser.auth = {};
-          newUser.auth.facebookToken = token;
+          console.log('facebook profile: ', profile);
+          // newUser.facebook.id = profile.id;
+          newUser.facebook.token = token;
           newUser.save(function(err) {
             if (err) {
               throw err;
             }
+            delete newUser.facebook.token;
             return done(null, newUser);
           });
         }
@@ -85,7 +86,7 @@ module.exports = function(passport) {
     callbackURL: config.twitterAuth.callbackURL
   }, function(token, tokenSecret, profile, done) {
     process.nextTick(function() {
-      User.findOne({ 'auth.twitterToken': token }, function(err, user) {
+      User.findOne({ 'twitter.token': token }, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -94,15 +95,15 @@ module.exports = function(passport) {
         }
         else {
           var newUser = new User();
-          newUser.username = Math.random().toString(); // TODO make username and role required only when using the local strategy
-          newUser.isAuthenticatedWith = {};
-          newUser.isAuthenticatedWith.twitter = true;
-          newUser.auth = {};
-          newUser.auth.twitterToken = token;
+          newUser.twitter = {};
+          console.log('twitter profile: ', profile);
+          // newUser.twitter.id = profile.id
+          newUser.twitter.token = token;
           newUser.save(function(err) {
             if (err) {
               throw err;
             }
+            delete newUser.twitter.token;
             return done(null, newUser);
           });
         }
@@ -117,7 +118,7 @@ module.exports = function(passport) {
     callbackURL: config.googleAuth.callbackURL
   }, function(token, refreshToken, profile, done) {
     process.nextTick(function() {
-      User.findOne({ 'auth.googleToken': token }, function(err, user) {
+      User.findOne({ 'google.token': token }, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -126,15 +127,15 @@ module.exports = function(passport) {
         }
         else {
           var newUser = new User();
-          newUser.username = Math.random().toString();
-          newUser.isAuthenticatedWith = {};
-          newUser.isAuthenticatedWith.google = true;
-          newUser.auth = {};
-          newUser.auth.googleToken = token;
+          newUser.google = {};
+          console.log('google profile: ', profile);
+          // newUser.google.id = profile.id;
+          newUser.google.token = token;
           newUser.save(function(err) {
             if (err) {
               throw err;
             }
+            delete newUser.google.token;
             return done(null, newUser);
           });
         }
