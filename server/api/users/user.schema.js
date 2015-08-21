@@ -1,11 +1,9 @@
 var Schema = require('mongoose').Schema;
-var uniqueValidator = require('mongoose-unique-validator');
-var _ = require('lodash');
 
 var userSchema = new Schema({
   local: {
     username: String,
-    role: String,
+    role: { type: String, enum: ['user', 'admin']},
     hashedPassword: { type: String, select: false }
   },
 
@@ -83,104 +81,9 @@ userSchema.pre('validate', function(next) {
     this.invalidate('google.token', 'Google auth requires a token.');
     next('Google auth requires a token.');
   }
+
+  // call next() if all validations pass
   next();
 });
 
 module.exports = userSchema;
-
-// userSchema.path('local.username').validate(function(username) {
-//   return !!username
-// }, 'Local auth requires a username.');
-
-// var userSchema = new Schema({
-//   local: {
-//     username: {
-//       type: String,
-//       // unique: true,
-//       // index: false,
-//       validate: [ localUsernameRequired, 'Local auth requires a username.' ]
-//     },
-//     role: {
-//       type: String,
-//       validate: [ localRoleRequired, 'Local auth requires a role.' ]
-//     },
-//     hashedPassword: {
-//       type: String,
-//       select: false,
-//       validate: [ localHashedPasswordRequired, 'Local auth requires a hashedPassword.' ]
-//     }
-//   },
-//
-//   facebook: {
-//     id: {
-//       type: String,
-//       validate: [ facebookIdRequired, 'Facebook auth requires an id.' ]
-//     },
-//     token: {
-//       type: String,
-//       select: false,
-//       validate: [ facebookTokenRequired, 'Facebook auth requires a token.' ]
-//     }
-//   },
-//
-//   twitter: {
-//     id: {
-//       type: String,
-//       validate: [ twitterIdRequired, 'Twitter auth requires an id.' ]
-//     },
-//     token: {
-//       type: String,
-//       select: false,
-//       validate: [ twitterTokenRequired, 'Twitter auth requires a token.' ]
-//     }
-//   },
-//
-//   google: {
-//     id: {
-//       type: String,
-//       validate: [ googleIdRequired, 'Google auth requires an id.' ]
-//     },
-//     token: {
-//       type: String,
-//       select: false,
-//       validate: [ googleTokenRequired, 'Google auth requires a token.' ]
-//     }
-//   }
-// });
-//
-//
-// LOCAL
-// function localUsernameRequired(username) {
-//   console.log('username: ', username);
-//   return !!username;
-// }
-// function localRoleRequired(role) {
-//   return !!role;
-// }
-// function localHashedPasswordRequired(hashedPassword) {
-//   return !!hashedPassword;
-// }
-//
-// // FACEBOOK
-// function facebookIdRequired(id) {
-//   return !!id;
-// }
-// function facebookTokenRequired(token) {
-//   return !!token;
-// }
-//
-// // TWITTER
-// function twitterIdRequired(id) {
-//   return !!id;
-// }
-// function twitterTokenRequired(token) {
-//   return !!token;
-// }
-//
-// // GOOGLE
-// function googleIdRequired(id) {
-//   return !!id;
-// }
-// function googleTokenRequired(token) {
-//   return !!token;
-// }

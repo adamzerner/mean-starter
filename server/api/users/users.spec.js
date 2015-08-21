@@ -252,7 +252,8 @@ describe('Users API (role: user)', function() {
         .put('/users/'+id)
         .send({
           local: {
-            username: 'updated'
+            username: 'updated',
+            password: 'password'
           }
         })
         .expect('Content-Type', /json/)
@@ -281,6 +282,47 @@ describe('Users API (role: user)', function() {
           }
         })
         .expect(201, done)
+      ;
+    });
+    it('Authorized: validates unique username', function(done) {
+      agent
+        .put('/users/'+id)
+        .send({
+          local: {
+            username: 'b',
+            password: 'password'
+          }
+        })
+        .expect(409)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          assert.equal(res.text, 'Username already exists.');
+          return done();
+        })
+      ;
+    });
+    it('Authorized: only adds fields in the schema', function(done) {
+      agent
+        .put('/users/'+id)
+        .send({
+          local: {
+            username: 'c',
+            password: 'password',
+            foo: 'bar'
+          }
+        })
+        .expect(201)
+        .end(function(err, res) {
+          if (err) {
+            return done(err);
+          }
+          var result = JSON.parse(res.text);
+          assert.equal(result.local.username, 'c');
+          assert(!result.local.foo);
+          return done();
+        })
       ;
     });
     it("Authorized: can't update role", function(done) {
@@ -363,46 +405,6 @@ describe('Users API (role: admin)', function() {
     User.remove({}).exec(done);
   });
 
-  describe('GET /users', function() {
-    it('When existing', function(done) {
-      agent
-        .get('/users')
-        .expect('Content-Type', /json/)
-        .expect(200)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          var result = JSON.parse(res.text)[0];
-          assert.equal(result._id, id);
-          assert(result.local);
-          assert.equal(result.local.username, user.local.username);
-          assert.equal(result.local.role, 'admin');
-          assert(!result.local.hashedPassword);
-          return done();
-        })
-      ;
-    });
-    it('When empty', function(done) {
-      User.remove({}).exec(function() {
-        agent
-          .get('/users')
-          .expect('Content-Type', /json/)
-          .expect(200)
-          .end(function(err, res) {
-            if (err) {
-              return done(err);
-            }
-            var result = JSON.parse(res.text);
-            assert.deepEqual(result, []);
-            return done();
-          })
-        ;
-      });
-    });
-  });
-
-
   describe('GET /users/:id', function() {
     it('Valid id', function(done) {
       agent
@@ -428,110 +430,6 @@ describe('Users API (role: admin)', function() {
       agent
         .get('/users/'+invalidId)
         .expect(404, done)
-      ;
-    });
-  });
-
-  describe('POST /users', function() {
-    it('Valid', function(done) {
-      agent
-        .post('/users')
-        .send({
-          local: {
-            username: 'b', password: 'password'
-          }
-        })
-        .expect('Content-Type', /json/)
-        .expect(201)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          var result = JSON.parse(res.text);
-          assert(result._id);
-          assert(result.local);
-          assert.equal(result.local.username, 'b');
-          assert.equal(result.local.role, 'user');
-          assert(!result.local.hashedPassword);
-          return done();
-        })
-      ;
-    });
-    it('Validates required username', function(done) {
-      agent
-        .post('/users')
-        .send({
-          local: {
-            password: 'password'
-          }
-        })
-        .expect(400)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          assert.equal(res.text, 'A username is required.');
-          return done();
-        })
-      ;
-    });
-    it('Validates required password', function(done) {
-      agent
-        .post('/users')
-        .send({
-          local: {
-            username: 'c'
-          }
-        })
-        .expect(400)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          assert.equal(res.text, 'A password is required.');
-          return done();
-        })
-      ;
-    });
-    it('Validates unique username', function(done) {
-      agent
-        .post('/users')
-        .send({
-          local: {
-            username: 'admin',
-            password: 'password'
-          }
-        })
-        .expect(409)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          assert.equal(res.text, 'Username already exists.');
-          return done();
-        })
-      ;
-    });
-    it('Only adds fields in the schema', function(done) {
-      agent
-        .post('/users')
-        .send({
-          local: {
-            username: 'b',
-            password: 'password',
-            foo: 'bar'
-          }
-        })
-        .expect(201)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          var result = JSON.parse(res.text);
-          assert.equal(result.local.username, 'b');
-          assert(!result.local.foo);
-          return done();
-        })
       ;
     });
   });
