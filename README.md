@@ -9,13 +9,28 @@ Features:
 - Admin panel
 - Tests
 
+### Commands ###
+```
+// START SERVER:
+node server/app.js
+
+// KARMA TESTS:
+gulp karma
+
+// MOCHA TESTS:
+gulp mocha
+
+// LIVE RELOAD:
+gulp livereload
+```
+
 ### Technical Notes ###
 - [Apiary Docs](http://docs.meanstarter.apiary.io)
 - If you're going to be using Facebook/Twitter/Google, you'll need to register your app with them. Use the following links:
     - [Facebook](https://developers.facebook.com/apps/) ([tutorial](https://scotch.io/tutorials/easy-node-authentication-facebook))
     - [Twitter](https://apps.twitter.com/) ([tutorial](https://scotch.io/tutorials/easy-node-authentication-twitter))
     - [Google](https://console.developers.google.com) ([tutorial](https://scotch.io/tutorials/easy-node-authentication-google))
-- After doing so, you'll want to rename `example-config.json` to `config.json` and add your app keys/ids/secrets. `config.json` is in `.gitignore`, so this sensitive data won't be tracked.
+- After doing so, you'll want to rename `example-config.json` to `config.json`. Then 1) change APPNAME to your app's name and 2) add your app keys/ids/secrets. `config.json` is in `.gitignore`, so this sensitive data won't be tracked.
 - Facebook appends `#_=_` to the return URL, which is ugly and potentially problematic. You may want to follow [this](http://stackoverflow.com/questions/7131909/facebook-callback-appends-to-return-url) advice in cleaning it up.
 - You may want to add a `.notes.txt` file to keep notes with. It's in `.gitignore`, so it won't get tracked; it'd just be for your reference.
 - SSO login flow:
@@ -42,22 +57,6 @@ Features:
     - Supertest + Mocha + Assert
 - Gulp
 - [Component-based](https://scotch.io/tutorials/angularjs-best-practices-directory-structure) file structure
-
-
-### Commands ###
-```
-// START SERVER:
-node server/app.js
-
-// KARMA TESTS:
-gulp karma
-
-// MOCHA TESTS:
-gulp mocha
-
-// LIVE RELOAD:
-gulp livereload
-```
 
 ### To Do ###
 - Fix run block problem for karma tests.
