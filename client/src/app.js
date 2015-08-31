@@ -9,15 +9,14 @@ function config($locationProvider, $urlRouterProvider) {
   $urlRouterProvider.otherwise('/');
 }
 
-function run(Auth, $cookies, $rootScope) {
+function run($http, $cookies, $rootScope) {
   $rootScope.user = {};
-  Auth.getCurrentUser();
+  // Auth.getCurrentUser();
+  $http
+    .get('/current-user')
+    .then(function(response) {
+      angular.copy(response.data, $rootScope.user);
+      $cookies.put('userId', response.data._id);
+    })
+  ;
 }
-
-// $http
-//   .get('/current-user')
-//   .then(function(response) {
-//     angular.copy(response.data, $rootScope.user);
-//     $cookies.put('userId', response.data._id);
-//   })
-// ;
