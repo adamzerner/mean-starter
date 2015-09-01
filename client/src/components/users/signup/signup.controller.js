@@ -3,7 +3,7 @@ angular
   .controller('SignupController', SignupController)
 ;
 
-function SignupController(Auth, $window) {
+function SignupController(Auth, $state, $window) {
   var vm = this;
   vm.invalidSubmitAttempted = false;
   vm.usernameExists = false;
@@ -12,6 +12,9 @@ function SignupController(Auth, $window) {
       delete vm.user.passwordConfirmation;
       Auth
         .signup(vm.user)
+        .then(function() {
+          $state.go('home');
+        })
         .catch(function(response) {
           if (response.data === 'Username already exists.') {
             vm.usernameExists = true;

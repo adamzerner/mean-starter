@@ -3,7 +3,7 @@ angular
   .controller('LoginController', LoginController)
 ;
 
-function LoginController(Auth, $window) {
+function LoginController(Auth, $state, $window) {
   var vm = this;
   vm.invalidSubmitAttempted = false;
   vm.invalidCredentials = false;
@@ -11,6 +11,9 @@ function LoginController(Auth, $window) {
     if (isValid) {
       Auth
         .login(vm.user)
+        .then(function() {
+          $state.go('home');
+        })
         .catch(function(response) {
           if (response.status === 401) {
             vm.invalidCredentials = true;
