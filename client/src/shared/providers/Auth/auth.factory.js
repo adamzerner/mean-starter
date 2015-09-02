@@ -26,7 +26,7 @@ function Auth($http, $cookies, $q, $rootScope) {
     },
 
     logout: function() {
-      $http
+      return $http
         .get('/logout')
         .then(function() {
           angular.copy({}, $rootScope.user);

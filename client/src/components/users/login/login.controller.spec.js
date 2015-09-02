@@ -10,7 +10,9 @@ describe('LoginController', function() {
   beforeEach(inject(function($controller, _Auth_) {
     Auth = _Auth_;
     createController = function() {
-      return $controller('LoginController');
+      return $controller('LoginController', {
+        Auth: _Auth_
+      });
     };
   }));
 
