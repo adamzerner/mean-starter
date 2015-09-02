@@ -16,25 +16,22 @@ describe('Auth Factory', function() {
     return !!el.$$state;
   }
 
-  beforeEach(module('mean-starter', 'ngCookies', 'templates'));
+  beforeEach(module('auth', 'ngCookies', 'templates'));
   beforeEach(inject(function(_Auth_, _$httpBackend_, _$rootScope_, _$cookies_, _$q_) {
     Auth = _Auth_;
     $httpBackend = _$httpBackend_;
     $rootScope = _$rootScope_;
     $cookies = _$cookies_;
     $q = _$q_;
+    $rootScope.user = {};
   }));
-  beforeEach(function() {
-    spyOn(Auth, 'getCurrentUser');
-  });
   afterEach(function() {
-    expect(Auth.getCurrentUser).toHaveBeenCalled();
     $httpBackend.verifyNoOutstandingExpectation();
     $httpBackend.verifyNoOutstandingRequest();
   });
 
+
   it('#signup', function() {
-    $rootScope.user = {};
     $httpBackend.expectPOST('/users', user).respond(response);
     spyOn(angular, 'copy').and.callThrough();
     spyOn($cookies, 'put').and.callThrough();
@@ -43,10 +40,10 @@ describe('Auth Factory', function() {
     expect(angular.copy).toHaveBeenCalledWith(response, $rootScope.user);
     expect($cookies.put).toHaveBeenCalledWith('userId', 1);
     expect(isPromise(retVal)).toBe(true);
+    expect($rootScope.user).toEqual(response);
   });
 
   it('#login', function() {
-    $rootScope.user = {};
     $httpBackend.expectPOST('/login', user).respond(response);
     spyOn(angular, 'copy').and.callThrough();
     spyOn($cookies, 'put').and.callThrough();
@@ -55,6 +52,7 @@ describe('Auth Factory', function() {
     expect(angular.copy).toHaveBeenCalledWith(response, $rootScope.user);
     expect($cookies.put).toHaveBeenCalledWith('userId', 1);
     expect(isPromise(retVal)).toBe(true);
+    expect($rootScope.user).toEqual(response);
   });
 
   it('#logout', function() {
@@ -85,12 +83,23 @@ describe('Auth Factory', function() {
       expect(isPromise(retVal)).toBe(true);
     });
     it("User isn't logged in", function() {
-      $rootScope.user = {};
       $cookies.remove('userId');
       spyOn($q, 'when').and.callThrough();
       var retVal = Auth.getCurrentUser();
       expect($q.when).toHaveBeenCalledWith({});
       expect(isPromise(retVal)).toBe(true);
     });
+  });
+
+  it('#requestCurrentUser', function() {
+    $httpBackend.expectGET('/current-user').respond(response);
+    spyOn(angular, 'copy').and.callThrough();
+    spyOn($cookies, 'put').and.callThrough();
+    var retVal = Auth.requestCurrentUser();
+    $httpBackend.flush();
+    expect(angular.copy).toHaveBeenCalledWith(response, $rootScope.user);
+    expect($cookies.put).toHaveBeenCalledWith('userId', response._id);
+    expect(isPromise(retVal)).toBe(true);
+    expect($rootScope.user).toEqual(response);
   });
 });

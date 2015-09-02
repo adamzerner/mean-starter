@@ -5,7 +5,7 @@ describe('User Service', function() {
     return !!el.$$state;
   }
 
-  beforeEach(module('mean-starter', 'templates'));
+beforeEach(module('mean-starter', 'mock-auth', 'templates'));
   beforeEach(inject(function(_User_, _$httpBackend_) {
     User = _User_;
     $httpBackend = _$httpBackend_;

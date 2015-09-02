@@ -59,7 +59,6 @@ gulp livereload
 - [Component-based](https://scotch.io/tutorials/angularjs-best-practices-directory-structure) file structure
 
 ### To Do ###
-- Fix run block problem for karma tests.
 - Tests for directives.
 - Gulp task for deploying.
 - E2E tests?
