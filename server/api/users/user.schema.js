@@ -1,15 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var uniqueValidator = require('mongoose-unique-validator');
-var autopopulate = require('mongoose-autopopulate');
 var ObjectId = Schema.Types.ObjectId;
-
-var UserSchema = new Schema({
-  local: { type: ObjectId, ref: 'Local' },
-  facebook: { type: ObjectId, ref: 'Facebook', autopopulate: true },
-  twitter: { type: ObjectId, ref: 'Twitter', autopopulate: true },
-  google: { type: ObjectId, ref: 'Google', autopopulate: true }
-}).plugin(autopopulate);
 
 var LocalSchema = new Schema({
   username: { type: String, required: true, unique: true },
@@ -30,6 +22,13 @@ var TwitterSchema = new Schema({
 var GoogleSchema = new Schema({
   id: { type: String, required: true },
   token: { type: String, required: true }
+});
+
+var UserSchema = new Schema({
+  local: { type: ObjectId, ref: 'Local' },
+  facebook: { type: ObjectId, ref: 'Facebook' },
+  twitter: { type: ObjectId, ref: 'Twitter' },
+  google: { type: ObjectId, ref: 'Google' }
 });
 
 exports.UserSchema = UserSchema;
