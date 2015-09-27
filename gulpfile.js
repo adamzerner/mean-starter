@@ -30,7 +30,7 @@ gulp.task('build-css', function() {
 
 gulp.task('mocha', function() {
   gulp
-    .src('server/api/**/*.spec.js', { read: false })
+    .src('server/**/*.spec.js', { read: false })
     .pipe(mocha())
     .once('error', function () {
       process.exit(1);
